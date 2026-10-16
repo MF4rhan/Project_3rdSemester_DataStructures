@@ -1,0 +1,105 @@
+# ==============================================================================
+# C / C++ COMPILED BINARIES & OBJECT FILES
+# ==============================================================================
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.a
+*.lib
+*.exe
+*.out
+*.app
+
+# Debug symbols, linkage artifacts & logs
+*.pdb
+*.idb
+*.ilk
+*.dSYM/
+*.map
+*.d
+*.log
+*.tlog
+*.lastbuildstate
+
+# ==============================================================================
+# BUILD DIRECTORIES & BUILD SYSTEMS (Make, CMake, Ninja)
+# ==============================================================================
+bin/
+obj/
+build/
+bin-int/
+out/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+CMakeScripts/
+cmake_install.cmake
+Makefile.in
+.ninja_*
+
+# ==============================================================================
+# VISUAL STUDIO (Full IDE)
+# ==============================================================================
+.vs/
+Debug/
+Release/
+x64/
+x86/
+ARM/
+ARM64/
+ipch/
+
+# VS user-specific settings and cache databases
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.db
+*.opendb
+
+# ==============================================================================
+# VISUAL STUDIO CODE & TOOLING CACHES
+# ==============================================================================
+# Ignored completely so local compiler paths/extensions don't conflict across team members
+.vscode/
+*.code-workspace
+.history/
+
+# Language server & linter caches (Clangd, ccls)
+.cache/
+.clangd/
+compile_commands.json
+
+# ==============================================================================
+# LINUX ARTIFACTS & EDITORS
+# ==============================================================================
+# Core dumps & profiler logs
+core
+core.*
+vgcore.*
+valgrind.log*
+gmon.out
+
+# KDE Dolphin / system directory settings
+.directory
+
+# Common terminal editor swaps (Nano, Vim, Kate)
+*~
+*.swp
+*.swo
+*.swn
+.*.sw?
+*.kate-swp
+
+# ==============================================================================
+# WINDOWS OS ARTIFACTS
+# ==============================================================================
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
