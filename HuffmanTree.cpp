@@ -1,4 +1,5 @@
 #include "HuffmanTree.h"
+#include "MinHeap.h"
 #include <string>
 #include <fstream>
 using namespace std;
