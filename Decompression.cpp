@@ -78,3 +78,34 @@ Node* deserializeTree(ifstream& in_file)
 
     return nullptr;
 }
+
+// Main decompression function.
+// Takes the compressed input file path and the destination output file path.
+// Opens binary streams, validates them, and will coordinate decompression in subsequent steps.
+bool decompressFile(const string& input_file_path, const string& output_file_path)
+{
+    // Open the compressed file in binary mode
+    ifstream in_file(input_file_path, ios::binary);
+    if (!in_file.is_open())
+    {
+        cerr << "Error: Could not open input file for decompression: " << input_file_path << endl;
+        return false;
+    }
+
+    // Open the output file in binary mode to write the recovered data
+    ofstream out_file(output_file_path, ios::binary);
+    if (!out_file.is_open())
+    {
+        cerr << "Error: Could not open output file for decompression: " << output_file_path << endl;
+        in_file.close();
+        return false;
+    }
+
+    // Decompression steps will be added here in upcoming commits
+
+    // Close the file streams
+    in_file.close();
+    out_file.close();
+
+    return true;
+}
