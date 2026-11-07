@@ -2,7 +2,7 @@
 
 MinHeap::MinHeap(int s) : size(s) {}
 
-int getSize() const { return size; }
+int MinHeap::getSize() const { return size; }
 	
 void MinHeap::insert(Node * newNode) {
 	heap[size] = newNode;
