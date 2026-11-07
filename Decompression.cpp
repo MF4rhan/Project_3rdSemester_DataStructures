@@ -202,16 +202,31 @@ bool decompressFile(const string& input_file_path, const string& output_file_pat
                 out_file.put(current_node->character);
                 decoded_bytes_count++;
                 current_node = root_node; // Reset back to root for the next character
+
+                // Padding protection: as soon as all original bytes are recovered,
+                // stop decoding immediately so any trailing padding bits are ignored
+                if (decoded_bytes_count == original_file_size)
+                {
+                    break;
+                }
             }
         }
     }
 
-    // Clean up allocated tree memory to prevent memory leaks
+    // Step 5: Clean up allocated tree memory to prevent memory leaks
     deleteTree(root_node);
 
     // Close the file streams
     in_file.close();
     out_file.close();
+
+    // Verify file integrity: ensure decoded byte count matches original file size
+    if (decoded_bytes_count != original_file_size)
+    {
+        cerr << "Error: Decompressed size (" << decoded_bytes_count 
+             << " bytes) does not match original size (" << original_file_size << " bytes)." << endl;
+        return false;
+    }
 
     return true;
 }
