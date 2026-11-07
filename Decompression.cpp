@@ -101,7 +101,40 @@ bool decompressFile(const string& input_file_path, const string& output_file_pat
         return false;
     }
 
-    // Decompression steps will be added here in upcoming commits
+    // Check if the compressed file itself is completely empty (0 bytes)
+    in_file.seekg(0, ios::end);
+    streampos file_length = in_file.tellg();
+    in_file.seekg(0, ios::beg);
+
+    if (file_length == 0)
+    {
+        in_file.close();
+        out_file.close();
+        return true;
+    }
+
+    // Step 1: Read metadata (original file size - 8 bytes)
+    uint64_t original_file_size = 0;
+    in_file.read(reinterpret_cast<char*>(&original_file_size), sizeof(original_file_size));
+
+    // Verify that all 8 bytes of metadata were successfully read
+    if (in_file.gcount() < static_cast<streamsize>(sizeof(original_file_size)))
+    {
+        cerr << "Error: Could not read header metadata from file." << endl;
+        in_file.close();
+        out_file.close();
+        return false;
+    }
+
+    // If the original file was empty, nothing left to decode
+    if (original_file_size == 0)
+    {
+        in_file.close();
+        out_file.close();
+        return true;
+    }
+
+    // Subsequent steps (tree reconstruction, bit decoding) will be added next
 
     // Close the file streams
     in_file.close();
