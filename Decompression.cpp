@@ -134,7 +134,20 @@ bool decompressFile(const string& input_file_path, const string& output_file_pat
         return true;
     }
 
-    // Subsequent steps (tree reconstruction, bit decoding) will be added next
+    // Step 2: Reconstruct the Huffman tree from the serialized bytes
+    Node* root_node = deserializeTree(in_file);
+    if (root_node == nullptr)
+    {
+        cerr << "Error: Failed to deserialize Huffman tree from compressed file." << endl;
+        in_file.close();
+        out_file.close();
+        return false;
+    }
+
+    // Subsequent steps (single char edge case, bit decoding) will be added next
+
+    // Clean up allocated tree memory to prevent memory leaks
+    deleteTree(root_node);
 
     // Close the file streams
     in_file.close();
