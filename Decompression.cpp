@@ -144,7 +144,24 @@ bool decompressFile(const string& input_file_path, const string& output_file_pat
         return false;
     }
 
-    // Subsequent steps (single char edge case, bit decoding) will be added next
+    // Step 3: Handle special edge case: file contains only 1 unique character (e.g. "AAAAA")
+    // When there is only 1 unique character, the root itself is a leaf node with no children.
+    if (root_node->left == nullptr && root_node->right == nullptr)
+    {
+        // Write the single character original_file_size times to restore the exact original content
+        for (uint64_t i = 0; i < original_file_size; i++)
+        {
+            out_file.put(root_node->character);
+        }
+
+        // Clean up heap memory and close streams
+        deleteTree(root_node);
+        in_file.close();
+        out_file.close();
+        return true;
+    }
+
+    // Subsequent steps (bitstream decoding) will be added next
 
     // Clean up allocated tree memory to prevent memory leaks
     deleteTree(root_node);
