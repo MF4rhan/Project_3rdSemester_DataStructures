@@ -161,7 +161,50 @@ bool decompressFile(const string& input_file_path, const string& output_file_pat
         return true;
     }
 
-    // Subsequent steps (bitstream decoding) will be added next
+    // Step 4: Decode data using bit-by-bit tree traversal
+    uint64_t decoded_bytes_count = 0;
+    Node* current_node = root_node;
+    char buffer_char;
+
+    // Read byte by byte from the compressed file
+    while (decoded_bytes_count < original_file_size && in_file.get(buffer_char))
+    {
+        unsigned char current_byte = static_cast<unsigned char>(buffer_char);
+
+        // Read 8 bits: from bit 7 (MSB) down to bit 0 (LSB)
+        for (int bit_index = 7; bit_index >= 0; bit_index--)
+        {
+            int bit_val = (current_byte >> bit_index) & 1;
+
+            // Bit 0 means traverse left child; Bit 1 means traverse right child
+            if (bit_val == 0)
+            {
+                current_node = current_node->left;
+            }
+            else
+            {
+                current_node = current_node->right;
+            }
+
+            // Safety check: if traversal leads to a null pointer, file is corrupted
+            if (current_node == nullptr)
+            {
+                cerr << "Error: Corrupted bitstream encountered during tree traversal." << endl;
+                deleteTree(root_node);
+                in_file.close();
+                out_file.close();
+                return false;
+            }
+
+            // If we reached a leaf node, we found an original character!
+            if (current_node->left == nullptr && current_node->right == nullptr)
+            {
+                out_file.put(current_node->character);
+                decoded_bytes_count++;
+                current_node = root_node; // Reset back to root for the next character
+            }
+        }
+    }
 
     // Clean up allocated tree memory to prevent memory leaks
     deleteTree(root_node);
