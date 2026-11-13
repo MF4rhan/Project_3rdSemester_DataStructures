@@ -243,6 +243,7 @@ jobs:
             qmake6 \
             qt6-qpa-plugins \
             qt6-wayland \
+            libgl1-mesa-dev \
             patchelf \
             desktop-file-utils \
             file
