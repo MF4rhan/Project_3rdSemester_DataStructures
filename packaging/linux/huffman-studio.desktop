@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Huffman File Compression Studio
+Comment=Lossless Huffman file compression and decompression tool
+Exec=HuffmanGUI
+Icon=huffman-studio
+Terminal=false
+Categories=Utility;Archiving;Compression;
