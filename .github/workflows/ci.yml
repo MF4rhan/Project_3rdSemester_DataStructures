@@ -1,0 +1,175 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - gui-experiment
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux (Ubuntu 24.04)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ cmake ninja-build qt6-base-dev
+
+      - name: Print toolchain versions
+        run: |
+          g++ --version
+          cmake --version
+          ninja --version
+          dpkg-query -W -f='qt6-base-dev: ${Version}\n' qt6-base-dev
+          if command -v qtpaths6 >/dev/null 2>&1; then
+            echo "qtpaths6: $(qtpaths6 --qt-version)"
+          fi
+          if command -v qmake6 >/dev/null 2>&1; then
+            qmake6 --version
+          fi
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_TESTS=ON
+
+      - name: Build all targets
+        run: |
+          cmake --build build \
+            --target HuffmanCore HuffmanCLI HuffmanGUI HuffmanCoreTests HuffmanGUITests \
+            --parallel
+
+      - name: Verify CTest registration
+        run: |
+          tests_output="$(ctest --test-dir build -N)"
+          echo "$tests_output"
+          grep -Eq 'Test[[:space:]]+#[0-9]+:[[:space:]]+HuffmanCoreTests[[:space:]]*$' <<< "$tests_output" || {
+            echo "::error::HuffmanCoreTests is not registered in CTest."
+            exit 1
+          }
+          grep -Eq 'Test[[:space:]]+#[0-9]+:[[:space:]]+HuffmanGUITests[[:space:]]*$' <<< "$tests_output" || {
+            echo "::error::HuffmanGUITests is not registered in CTest."
+            exit 1
+          }
+
+      - name: Run CTest (headless Qt)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          ctest --test-dir build --output-on-failure -V
+
+  windows:
+    name: Windows (MSVC 2022)
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Verify MSVC 2022 and CMake environment
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          if (-not (Test-Path $vswhere)) {
+            throw "vswhere.exe not found at $vswhere"
+          }
+
+          $vsPath = & $vswhere -latest -products * `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+            -property installationPath
+          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($vsPath)) {
+            throw "Visual Studio 2022 with x64 MSVC tools was not found."
+          }
+          Write-Host "Visual Studio path: $vsPath"
+
+          $clExe = Get-ChildItem -Path "$vsPath\VC\Tools\MSVC" -Filter "cl.exe" -Recurse |
+            Where-Object { $_.FullName -match '\\bin\\Hostx64\\x64\\cl\.exe$' } |
+            Sort-Object FullName -Descending |
+            Select-Object -First 1 -ExpandProperty FullName
+          if (-not $clExe) {
+            throw "x64 cl.exe not found under $vsPath\VC\Tools\MSVC"
+          }
+          $clVersion = (Get-Item $clExe).VersionInfo.FileVersion
+          Write-Host "MSVC compiler path: $clExe"
+          Write-Host "MSVC compiler version: $clVersion"
+
+          cmake --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Install Qt 6.12.0 (MSVC 2022 x64)
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          python -m pip install --upgrade pip aqtinstall
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $qtBaseDir = Join-Path $env:RUNNER_TEMP "Qt"
+          python -m aqt install-qt -O "$qtBaseDir" windows desktop 6.12.0 win64_msvc2022_64
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $qtKitDir = Join-Path $qtBaseDir "6.12.0\msvc2022_64"
+          $qtConfig = Join-Path $qtKitDir "lib\cmake\Qt6\Qt6Config.cmake"
+          if (-not (Test-Path $qtConfig)) {
+            throw "Qt6Config.cmake not found at $qtConfig"
+          }
+
+          "QT_ROOT_DIR=$qtKitDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          Write-Host "Installed Qt 6.12.0 MSVC 2022 x64 at: $qtKitDir"
+
+      - name: Configure CMake
+        run: |
+          $ErrorActionPreference = 'Stop'
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
+            "-DCMAKE_PREFIX_PATH=$env:QT_ROOT_DIR" `
+            -DBUILD_TESTS=ON
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build all targets (Release)
+        run: |
+          $ErrorActionPreference = 'Stop'
+          cmake --build build --config Release `
+            --target HuffmanCore HuffmanCLI HuffmanGUI HuffmanCoreTests HuffmanGUITests `
+            --parallel
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Verify CTest registration (Release)
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $testsOutput = ctest --test-dir build -C Release -N | Out-String
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Write-Host $testsOutput
+
+          if ($testsOutput -notmatch '(?m)Test\s+#\d+:\s+HuffmanCoreTests\r?$') {
+            Write-Error "HuffmanCoreTests is not registered in CTest."
+            exit 1
+          }
+          if ($testsOutput -notmatch '(?m)Test\s+#\d+:\s+HuffmanGUITests\r?$') {
+            Write-Error "HuffmanGUITests is not registered in CTest."
+            exit 1
+          }
+
+      - name: Run CTest (Release, headless Qt)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:PATH = "$env:QT_ROOT_DIR\bin;$env:PATH"
+          $env:QT_PLUGIN_PATH = "$env:QT_ROOT_DIR\plugins"
+          ctest --test-dir build -C Release --output-on-failure -V
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
