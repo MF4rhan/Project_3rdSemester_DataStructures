@@ -94,7 +94,33 @@ Example using g++:
 g++ main.cpp Node.cpp MinHeap.cpp HuffmanTree.cpp Compression.cpp Decompression.cpp -o Huffman
 ```
 
-## 9. Technologies Used
+## 9. How to Run the Project
+
+### Requirements
+- Visual Studio with C++ desktop development tools installed.
+- The project solution file (`.sln`).
+
+### Running in Visual Studio
+
+1. Clone or download the GitHub repository.
+2. Open `HuffmanProject.sln` in Visual Studio.
+3. Select the `Debug` configuration and `x64` platform.
+4. Make sure the Huffman project is selected as the Startup Project.
+5. Set the working directory to `$(ProjectDir)` under Project Properties → Configuration Properties → Debugging.
+6. Place the input file in the project directory (the directory containing the `.vcxproj` file).
+7. Press `Ctrl + F5` to run the program.
+
+
+### 10. Important Notes
+
+- Input and output files should use different filenames.
+- Files must be opened in binary mode.
+- The input file must exist in the program's working directory if only a relative filename is provided.
+- The compressed file contains the information needed to reconstruct the Huffman tree.
+- The decompressed output should be identical to the original file.
+
+
+## 11. Technologies Used
 
 - C++
 - Huffman Coding Algorithm
