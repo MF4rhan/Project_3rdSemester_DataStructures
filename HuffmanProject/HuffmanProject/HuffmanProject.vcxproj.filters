@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
@@ -15,39 +15,39 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Compression.h">
+    <ClInclude Include="..\..\core\Compression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Decompression.h">
+    <ClInclude Include="..\..\core\Decompression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\HuffmanTree.h">
+    <ClInclude Include="..\..\core\HuffmanTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\MinHeap.h">
+    <ClInclude Include="..\..\core\MinHeap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Node.h">
+    <ClInclude Include="..\..\core\Node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Compression.cpp">
+    <ClCompile Include="..\..\core\Compression.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Decompression.cpp">
+    <ClCompile Include="..\..\core\Decompression.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\HuffmanTree.cpp">
+    <ClCompile Include="..\..\core\HuffmanTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\main.cpp">
+    <ClCompile Include="..\..\console\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\MinHeap.cpp">
+    <ClCompile Include="..\..\core\MinHeap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Node.cpp">
+    <ClCompile Include="..\..\core\Node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

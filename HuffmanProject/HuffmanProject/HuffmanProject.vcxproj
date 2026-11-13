@@ -77,6 +77,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>..\..\core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -95,6 +96,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>..\..\core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -111,6 +113,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>..\..\core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,6 +132,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>..\..\core;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,19 +143,19 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Compression.h" />
-    <ClInclude Include="..\..\Decompression.h" />
-    <ClInclude Include="..\..\HuffmanTree.h" />
-    <ClInclude Include="..\..\MinHeap.h" />
-    <ClInclude Include="..\..\Node.h" />
+    <ClInclude Include="..\..\core\Compression.h" />
+    <ClInclude Include="..\..\core\Decompression.h" />
+    <ClInclude Include="..\..\core\HuffmanTree.h" />
+    <ClInclude Include="..\..\core\MinHeap.h" />
+    <ClInclude Include="..\..\core\Node.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Compression.cpp" />
-    <ClCompile Include="..\..\Decompression.cpp" />
-    <ClCompile Include="..\..\HuffmanTree.cpp" />
-    <ClCompile Include="..\..\main.cpp" />
-    <ClCompile Include="..\..\MinHeap.cpp" />
-    <ClCompile Include="..\..\Node.cpp" />
+    <ClCompile Include="..\..\core\Compression.cpp" />
+    <ClCompile Include="..\..\core\Decompression.cpp" />
+    <ClCompile Include="..\..\core\HuffmanTree.cpp" />
+    <ClCompile Include="..\..\console\main.cpp" />
+    <ClCompile Include="..\..\core\MinHeap.cpp" />
+    <ClCompile Include="..\..\core\Node.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

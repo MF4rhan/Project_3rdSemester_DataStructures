@@ -3,31 +3,60 @@
 #include "Decompression.h"   // reused for deleteTree()
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <string>
+#include <string_view>
 #include <cstdint>
 
 using namespace std;
+
+namespace {
+    filesystem::path pathFromUtf8(const string& path_str)
+    {
+        return filesystem::path(
+            u8string_view(reinterpret_cast<const char8_t*>(path_str.data()), path_str.size()));
+    }
+
+    void reportError(string* error_message, const string& message)
+    {
+        cerr << message << endl;
+        if (error_message != nullptr)
+        {
+            *error_message = message;
+        }
+    }
+}
 
 // Main compression function.
 // Output file format (must match Decompression.cpp):
 // 1) Metadata: original file size (8 bytes)
 // 2) Serialized Huffman tree (preorder: 0 = internal node, 1 = leaf + character)
 // 3) Compressed data: Huffman codes packed into bytes
-bool compressFile(const string& input_file_path, const string& output_file_path)
+bool compressFile(
+    const string& input_file_path,
+    const string& output_file_path,
+    string* error_message,
+    int* out_frequencies,
+    string* out_codes)
 {
+    if (error_message != nullptr)
+    {
+        error_message->clear();
+    }
+
     // Open the original file in binary mode so every byte is read exactly
-    ifstream in_file(input_file_path, ios::binary);
+    ifstream in_file(pathFromUtf8(input_file_path), ios::binary);
     if (!in_file.is_open())
     {
-        cerr << "Error: Could not open input file for compression: " << input_file_path << endl;
+        reportError(error_message, "Could not open input file for compression: " + input_file_path);
         return false;
     }
 
     // Open the output file in binary mode to write the compressed data
-    ofstream out_file(output_file_path, ios::binary);
+    ofstream out_file(pathFromUtf8(output_file_path), ios::binary);
     if (!out_file.is_open())
     {
-        cerr << "Error: Could not open output file for compression: " << output_file_path << endl;
+        reportError(error_message, "Could not open output file for compression: " + output_file_path);
         in_file.close();
         return false;
     }
@@ -50,8 +79,30 @@ bool compressFile(const string& input_file_path, const string& output_file_path)
     // Edge case: empty file, only the metadata is needed
     if (original_file_size == 0)
     {
+        if (out_frequencies != nullptr)
+        {
+            for (int i = 0; i < 256; i++)
+            {
+                out_frequencies[i] = 0;
+            }
+        }
+        if (out_codes != nullptr)
+        {
+            for (int i = 0; i < 256; i++)
+            {
+                out_codes[i].clear();
+            }
+        }
+
         in_file.close();
+        out_file.flush();
         out_file.close();
+        bool write_ok = static_cast<bool>(out_file);
+        if (!write_ok)
+        {
+            reportError(error_message, "Failed while writing compressed metadata to: " + output_file_path);
+            return false;
+        }
         return true;
     }
 
@@ -59,6 +110,21 @@ bool compressFile(const string& input_file_path, const string& output_file_path)
     Node* root_node = buildHuffmanTree(freq);
     string codes[256] = {};
     generateCodes(root_node, "", codes);
+
+    if (out_frequencies != nullptr)
+    {
+        for (int i = 0; i < 256; i++)
+        {
+            out_frequencies[i] = freq[i];
+        }
+    }
+    if (out_codes != nullptr)
+    {
+        for (int i = 0; i < 256; i++)
+        {
+            out_codes[i] = codes[i];
+        }
+    }
 
     // Step 4: Save the tree so the decompressor can rebuild it
     serializeHuffmanTree(root_node, out_file);
@@ -107,7 +173,15 @@ bool compressFile(const string& input_file_path, const string& output_file_path)
     // Step 7: Free the tree memory and close the files
     deleteTree(root_node);
     in_file.close();
+    out_file.flush();
     out_file.close();
+    bool write_ok = static_cast<bool>(out_file);
+
+    if (!write_ok)
+    {
+        reportError(error_message, "Failed while writing compressed data to: " + output_file_path);
+        return false;
+    }
 
     return true;
 }

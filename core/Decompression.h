@@ -16,6 +16,11 @@ Node* deserializeTree(ifstream& in_file);
 void deleteTree(Node* root_node);
 
 // Main decompression function.
-// Takes the path of the compressed input file and the target path for the decompressed output file.
+// Takes the compressed input file path and the target path for the decompressed output file.
+// Optional parameters return error details and the reconstructed 256-entry Huffman code table.
 // Returns true if decompression succeeded, or false if an error occurred.
-bool decompressFile(const string& input_file_path, const string& output_file_path);
+bool decompressFile(
+    const string& input_file_path,
+    const string& output_file_path,
+    string* error_message = nullptr,
+    string* out_codes = nullptr);
