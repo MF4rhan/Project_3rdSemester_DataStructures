@@ -112,25 +112,40 @@ jobs:
           cmake --version
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      - name: Install Qt 6.12.0 (MSVC 2022 x64)
+      - name: Install Qt 6.11.3 (MSVC 2022 x64 via aqtinstall)
         run: |
           $ErrorActionPreference = 'Stop'
 
-          python -m pip install --upgrade pip aqtinstall
+          python -m pip install --upgrade pip
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          python -m pip install --no-cache-dir git+https://github.com/miurahr/aqtinstall.git@f383b3c7d9658e881bd8ce8810057393bd934ee1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $archOutput = python -m aqt list-qt windows desktop --arch 6.11.3 | Out-String
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to list Qt 6.11.3 architectures via aqt list-qt (exit code $LASTEXITCODE)."
+          }
+          Write-Host "Available Qt 6.11.3 Windows desktop architectures:"
+          Write-Host $archOutput
+
+          $archTokens = $archOutput -split '\s+' | Where-Object { $_ -ne '' }
+          if ($archTokens -notcontains 'win64_msvc2022_64') {
+            throw "Qt 6.11.3 architecture 'win64_msvc2022_64' is not listed by aqt list-qt."
+          }
 
           $qtBaseDir = Join-Path $env:RUNNER_TEMP "Qt"
-          python -m aqt install-qt -O "$qtBaseDir" windows desktop 6.12.0 win64_msvc2022_64
+          python -m aqt install-qt -O "$qtBaseDir" windows desktop 6.11.3 win64_msvc2022_64
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-          $qtKitDir = Join-Path $qtBaseDir "6.12.0\msvc2022_64"
+          $qtKitDir = Join-Path $qtBaseDir "6.11.3\msvc2022_64"
           $qtConfig = Join-Path $qtKitDir "lib\cmake\Qt6\Qt6Config.cmake"
           if (-not (Test-Path $qtConfig)) {
             throw "Qt6Config.cmake not found at $qtConfig"
           }
 
           "QT_ROOT_DIR=$qtKitDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          Write-Host "Installed Qt 6.12.0 MSVC 2022 x64 at: $qtKitDir"
+          Write-Host "Installed Qt 6.11.3 MSVC 2022 x64 at: $qtKitDir"
 
       - name: Configure CMake
         run: |
